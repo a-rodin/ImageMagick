@@ -838,7 +838,10 @@ static MagickBooleanType LoadMimeList(const char *xml,const char *filename,
             if (*path != '\0')
               (void) ConcatenateMagickString(path,DirectorySeparator,
                 MaxTextExtent);
-            (void) ConcatenateMagickString(path,attribute,MaxTextExtent);
+            if (*attribute == *DirectorySeparator)
+              (void) CopyMagickString(path,attribute,MaxTextExtent);
+            else
+              (void) ConcatenateMagickString(path,attribute,MaxTextExtent);
             xml=FileToString(path,~0,exception);
             if (xml != (char *) NULL)
               {

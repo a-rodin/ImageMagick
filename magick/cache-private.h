@@ -187,6 +187,7 @@ typedef struct _CacheInfo
 } CacheInfo;
 
 extern MagickExport Cache
+  AcquirePixelCacheInfo(const unsigned long),
   DestroyPixelCacheInfo(Cache),
   GetImagePixelCache(Image *,ExceptionInfo *),
   ReferencePixelCache(Cache);
@@ -210,7 +211,6 @@ extern MagickExport IndexPacket
   *GetPixelCacheNexusIndexes(const Cache,NexusInfo *);
 
 extern MagickExport MagickBooleanType
-  GetPixelCacheInfo(Cache *,const unsigned long),
   SyncAuthenticPixelCacheNexus(Image *,NexusInfo *,ExceptionInfo *);
 
 extern MagickExport MagickSizeType

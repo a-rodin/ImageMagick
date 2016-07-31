@@ -277,7 +277,7 @@ static Image *ReadMPCImage(const ImageInfo *image_info,ExceptionInfo *exception)
                 break;
               if (c == (int) '=')
                 break;
-              if ((size_t) (p-keyword) < MaxTextExtent)
+              if ((size_t) (p-keyword) < (MaxTextExtent-1))
                 *p++=(char) c;
               c=ReadBlobByte(image);
             } while (c != EOF);

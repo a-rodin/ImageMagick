@@ -478,7 +478,7 @@ static Image *ReadPSImage(const ImageInfo *image_info,ExceptionInfo *exception)
     */
     *p++=(char) c;
     if ((strchr("\n\r%",c) == (char *) NULL) &&
-        ((size_t) (p-command) < MaxTextExtent))
+        ((size_t) (p-command) < (MaxTextExtent-1)))
       continue;
     *p='\0';
     p=command;
@@ -557,7 +557,7 @@ static Image *ReadPSImage(const ImageInfo *image_info,ExceptionInfo *exception)
           GetStringInfoDatum(profile)[i]=(unsigned char) c;
           *p++=(char) c;
           if ((strchr("\n\r%",c) == (char *) NULL) &&
-              ((size_t) (p-command) < MaxTextExtent))
+              ((size_t) (p-command) < (MaxTextExtent-1)))
             continue;
           *p='\0';
           p=command;

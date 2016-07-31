@@ -931,7 +931,7 @@
 
 /* Define to the system default library search path. */
 #ifndef MAGICKCORE_LT_DLSEARCH_PATH 
-#define MAGICKCORE_LT_DLSEARCH_PATH  "/lib:/usr/lib:/usr/lib/atlas:/usr/lib64/atlas:/usr/local/lib:/usr/lib/mysql:/usr/lib64/mysql:/usr/lib64/octave-3.0.2:/usr/lib64/qt-3.3/lib:/usr/lib64/tcl8.5:/usr/lib/xulrunner-1.9:/usr/lib64/xulrunner-1.9" 
+#define MAGICKCORE_LT_DLSEARCH_PATH  "/lib:/usr/lib:/usr/lib/atlas:/usr/lib64/atlas:/usr/local/lib:/usr/lib/mysql:/usr/lib64/mysql:/usr/lib64/octave-3.0.3:/usr/lib64/qt-3.3/lib:/usr/lib64/tcl8.5:/usr/lib/xulrunner-1.9:/usr/lib64/xulrunner-1.9" 
 #endif
 
 /* The archive extension */

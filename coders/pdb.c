@@ -700,7 +700,7 @@ static MagickBooleanType WritePDBImage(const ImageInfo *image_info,Image *image)
     pdb_info;
 
   QuantumInfo
-    quantum_info;
+    *quantum_info;
 
   register const PixelPacket
     *p;
@@ -812,12 +812,14 @@ static MagickBooleanType WritePDBImage(const ImageInfo *image_info,Image *image)
     sizeof(*scanline));
   if (scanline == (unsigned char *) NULL)
     ThrowWriterException(ResourceLimitError,"MemoryAllocationFailed");
-    if (image->colorspace != RGBColorspace)
+  if (image->colorspace != RGBColorspace)
     (void) SetImageColorspace(image,RGBColorspace);
   /*
     Convert to GRAY raster scanline.
   */
-  GetQuantumInfo(image_info,&quantum_info);
+  quantum_info=AcquireQuantumInfo(image_info,image);
+  if (quantum_info == (QuantumInfo *) NULL)
+    ThrowWriterException(ResourceLimitError,"MemoryAllocationFailed");
   bits=8/(long) bits_per_pixel-1;  /* start at most significant bits */
   literal=0;
   repeat=0;
@@ -828,7 +830,7 @@ static MagickBooleanType WritePDBImage(const ImageInfo *image_info,Image *image)
     p=GetVirtualPixels(image,0,y,image->columns,1,&image->exception);
     if (p == (const PixelPacket *) NULL)
       break;
-    (void) ExportQuantumPixels(image,(const ViewInfo *) NULL,&quantum_info,
+    (void) ExportQuantumPixels(image,(const ViewInfo *) NULL,quantum_info,
       GrayQuantum,scanline,&image->exception);
     for (x=0; x < pdb_image.width; x++)
     {
@@ -884,6 +886,7 @@ static MagickBooleanType WritePDBImage(const ImageInfo *image_info,Image *image)
   q=EncodeRLE(q,buffer,literal,repeat);
   scanline=(unsigned char *) RelinquishMagickMemory(scanline);
   buffer=(unsigned char *) RelinquishMagickMemory(buffer);
+  quantum_info=DestroyQuantumInfo(quantum_info);
   /*
     Write the Image record header.
   */

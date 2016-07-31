@@ -1855,11 +1855,11 @@ MagickExport MagickBooleanType WhiteThresholdImageChannel(Image *image,
         if ((MagickRealType) PixelIntensityToQuantum(q) > pixel.red)
           {
             if ((channel & RedChannel) != 0)
-              q->red=(Quantum) 0;
+              q->red=(Quantum) QuantumRange;
             if ((channel & GreenChannel) != 0)
-              q->green=(Quantum) 0;
+              q->green=(Quantum) QuantumRange;
             if ((channel & BlueChannel) != 0)
-              q->blue=(Quantum) 0;
+              q->blue=(Quantum) QuantumRange;
           }
         q++;
       }
@@ -1868,20 +1868,20 @@ MagickExport MagickBooleanType WhiteThresholdImageChannel(Image *image,
       {
         if (((channel & RedChannel) != 0) &&
             (q->red > pixel.red))
-          q->red=(Quantum) 0;
+          q->red=(Quantum) QuantumRange;
         if (((channel & GreenChannel) != 0) &&
             (q->green > pixel.green))
-          q->green=(Quantum) 0;
+          q->green=(Quantum) QuantumRange;
         if (((channel & BlueChannel) != 0) &&
             (q->blue > pixel.blue))
-          q->blue=(Quantum) 0;
+          q->blue=(Quantum) QuantumRange;
         if (((channel & OpacityChannel) != 0) &&
             (q->opacity > pixel.opacity))
-          q->opacity=(Quantum) 0;
+          q->opacity=(Quantum) QuantumRange;
         if (((channel & IndexChannel) != 0) &&
             (image->colorspace == CMYKColorspace) &&
             (indexes[x] > pixel.index))
-          indexes[x]=(Quantum) 0;
+          indexes[x]=(Quantum) QuantumRange;
         q++;
       }
     if (SyncCacheViewAuthenticPixels(image_view,exception) == MagickFalse)

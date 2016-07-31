@@ -249,6 +249,7 @@ WandExport MagickBooleanType IdentifyImageCommand(ImageInfo *image_info,
   if (status == MagickFalse)
     ThrowIdentifyException(ResourceLimitError,"MemoryAllocationFailed",
       strerror(errno));
+  image_info->ping=MagickTrue;
   for (i=1; i < (long) argc; i++)
   {
     option=argv[i];

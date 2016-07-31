@@ -910,7 +910,7 @@ MagickExport Image *ReadStream(const ImageInfo *image_info,StreamHandler stream,
   assert(exception != (ExceptionInfo *) NULL);
   assert(exception->signature == MagickSignature);
   read_info=CloneImageInfo(image_info);
-  (void) GetPixelCacheInfo(&read_info->cache,0);
+  read_info->cache=AcquirePixelCacheInfo(0);
   GetPixelCacheMethods(&cache_methods);
   cache_methods.get_virtual_pixel_handler=GetVirtualPixelStream;
   cache_methods.get_virtual_indexes_from_handler=GetVirtualIndexesFromStream;

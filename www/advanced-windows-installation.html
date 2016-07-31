@@ -30,10 +30,10 @@
     <tbody>
       <tr valign="top">
         <td align="left"><a href="../index.html"><img id="titlebar-west" src="../images/script.png" alt="[ImageMagick]" width="350" height="60" vspace="28" name="titlebar-west"/></a></td>
-        <td align="left"><a href="http://www.networkredux.com" target="1670164688"><img id="titlebar-west" src="../images/networkredux.png" alt="[sponsor]" border="0" vspace="45" name="titlebar-west"/></a></td>
+        <td align="left"><a href="http://www.networkredux.com" target="653209322"><img id="titlebar-west" src="../images/networkredux.png" alt="[sponsor]" border="0" vspace="45" name="titlebar-west"/></a></td>
         <td width="99%"><br /> </td>
         <td style="background-color: white" align="right"><a href="../index.html"><img src="../images/sprite.jpg" alt="" width="114" height="118" border="0" name="titlebar-east"/></a></td>
-        <td style="background-color: white" align="right"><a href="http://www.imagemagick.org/discourse-server/" target="233382597"><img id="titlebar-east" src="../images/logo.jpg" alt="" width="114" height="118" border="0" name="titlebar-east"/></a></td>
+        <td style="background-color: white" align="right"><a href="http://www.imagemagick.org/discourse-server/" target="1562063438"><img id="titlebar-east" src="../images/logo.jpg" alt="" width="114" height="118" border="0" name="titlebar-east"/></a></td>
       </tr>
     </tbody>
   </table>
@@ -51,12 +51,12 @@
       <a href="../www/command-line-tools.html">Command-line Tools</a>
       <a href="../www/command-line-processing.html" class="sub">Processing</a>
       <a href="../www/command-line-options.html" class="sub">Options</a>
-      <a href="http://www.imagemagick.org/Usage/" target="463416274" class="sub">Usage</a>
+      <a href="http://www.imagemagick.org/Usage/" target="1211954736" class="sub">Usage</a>
       <a href="../www/api.html">Program Interfaces</a>
       <a href="../www/magick-wand.html" class="sub">MagickWand</a>
       <a href="../www/magick-core.html" class="sub">MagickCore</a>
       <a href="../www/perl-magick.html" class="sub">PerlMagick</a>
-      <a href="../www/Magick++/" target="1761399310" class="sub">Magick++</a>
+      <a href="../www/Magick++/" target="61952652" class="sub">Magick++</a>
       <a href="../www/architecture.html">Architecture</a>
   <span>]</span><br /><span>[</span>
       <a href="../www/install-source.html">Install from Source</a>
@@ -75,9 +75,9 @@
   <span>]</span><br /><span>[</span>
       <a href="../www/sponsors.html">Sponsors:</a>
       <fieldset>
-  <a href="http://www.produkte24.com" class="sponsor" target="sponsor">Kataloge zum<br />Herunterladen</a><!-- 200910010000 -->
+  <a href="http://www.fernstudium-vergleich.de" class="sponsor" target="sponsor">Fernstudium</a><!-- 200908070325 -->
       <br />
-      <a href="http://meta-preisvergleich.de" class="sponsor" target="sponsor">Preisvergleich</a><!-- 200901010120 -->
+      <a href="http://meta-preisvergleich.de" class="sponsor" target="sponsor">Preisvergleich</a><!-- 200902010120 -->
       <br />
       <a href="http://www.checkcost.co.uk" class="sponsor" target="sponsor">Compare</a><!-- 200902010720 -->
       <br />
@@ -104,7 +104,9 @@
 
 <p>Building ImageMagick source for Windows requires a modern version of Microsoft Visual Studio IDE.  Users have reported success with the Borland C++ compiler as well.  If you don't have a compiler you can still install a self-installing <a href="../www/binary-releases.html#windows">binary release</a>.<p>
 
-<p>Download <a href="ftp://ftp.imagemagick.org/pub/ImageMagick/windows/ImageMagick-windows.zip">ImageMagick-windows.zip</a> from <a href="ftp://ftp.imagemagick.org/pub/ImageMagick/windows" target="431643496">ftp.imagemagick.org</a> or its <a href="../www/download.html">mirrors</a>.  You can unpack the distribution with <a href="http://www.winzip.com" target="321044203">WinZip</a> or type the following from any MS-DOS Command Prompt window:<p>
+<p>Download <a href="ftp://ftp.imagemagick.org/pub/ImageMagick/windows/ImageMagick-windows.zip">ImageMagick-windows.zip</a> from <a href="ftp://ftp.imagemagick.org/pub/ImageMagick/windows" target="28553839">ftp.imagemagick.org</a> or its <a href="../www/download.html">mirrors</a> and verify the distribution against its <a href="http://www.imagemagick.org/download/windows/digest.rdf">message digest</a>.</p>
+
+<p>You can unpack the distribution with <a href="http://www.winzip.com" target="299703676">WinZip</a> or type the following from any MS-DOS Command Prompt window:<p>
 
 <pre class="text">
   unzip ImageMagick-windows.zip
@@ -116,7 +118,7 @@
   <h2><a name="configure"></a>Configure</h2>
 </div>
 
-<p>These instructions are specific to building ImageMagick with the <a href="http://msdn.microsoft.com/vstudio/" target="818649460">Visual Studio</a> under Windows XP, Win2K, or Windows 98.  ImageMagick does not include any workspace (DSW) or project files (DSP) except for those included with third party libraries. Instead, there is a <kbd>configure</kbd> program that must be built and run which creates the Visual Studio workspaces for ImageMagick.  The Visual Studio system provides four different types of <em>runtime</em> environments that must match across all application, library, and dynamic-library (DLL) code that is built. The <kbd>configure</kbd> program creates a set of build files that are consistent for a specific runtime selection listed here:</p>
+<p>These instructions are specific to building ImageMagick with the <a href="http://msdn.microsoft.com/vstudio/" target="1991753044">Visual Studio</a> under Windows XP, Win2K, or Windows 98.  ImageMagick does not include any workspace (DSW) or project files (DSP) except for those included with third party libraries. Instead, there is a <kbd>configure</kbd> program that must be built and run which creates the Visual Studio workspaces for ImageMagick.  The Visual Studio system provides four different types of <em>runtime</em> environments that must match across all application, library, and dynamic-library (DLL) code that is built. The <kbd>configure</kbd> program creates a set of build files that are consistent for a specific runtime selection listed here:</p>
 
 <ol>
   <li>Dynamic Multi-threaded DLL runtimes (VisualDynamicMT).</li>
@@ -290,7 +292,7 @@
   convert image.ext win:
 </pre>
 
-<p>Make sure <a href="http://www.cs.wisc.edu/~ghost/" target="34675694">Ghostscript</a> is installed, otherwise, you will be unable to convert or view a Postscript document, and Postscript standard fonts will not be available.</p>
+<p>Make sure <a href="http://www.cs.wisc.edu/~ghost/" target="1531021271">Ghostscript</a> is installed, otherwise, you will be unable to convert or view a Postscript document, and Postscript standard fonts will not be available.</p>
 
 <p>You may use any standard web browser (e.g. Internet Explorer) to browse the ImageMagick documentation.</p>
 
@@ -304,7 +306,7 @@
   <h2><a name="Install"></a>Install</h2>
 </div>
 
-<p>You can run ImageMagick command line utilities directly from the <kbd>VisualMagick\bin</kbd> folder, however, in most cases you may want the convenience of an installer script.  ImageMagick provides <a href="http://www.jrsoftware.org" target="1797938490">Inno Setup</a> scripts for this purpose.  Note, you must define MAGICKCORE_INSTALLED_SUPPORT at <a href="#configure">configure</a> time to utilize the installer scripts.</p>
+<p>You can run ImageMagick command line utilities directly from the <kbd>VisualMagick\bin</kbd> folder, however, in most cases you may want the convenience of an installer script.  ImageMagick provides <a href="http://www.jrsoftware.org" target="1463550172">Inno Setup</a> scripts for this purpose.  Note, you must define MAGICKCORE_INSTALLED_SUPPORT at <a href="#configure">configure</a> time to utilize the installer scripts.</p>
 
 <p>To get started building a self-installing ImageMagick executable, go to <kbd>VisualMagick\installer</kbd> folder and click on a script that matches your build environment.  Press F9 to build and install ImageMagick.  The default location is <kbd>C:Program Files\ImageMagick-6.?.?\Q?</kbd>.  The exact folder name depends on the ImageMagick version and quantum depth.  Once installed, ImageMagick command line utilities and libraries are available to the MS Command Prompt, web scripts, or to meet your development needs.</p>
 
@@ -315,8 +317,8 @@
 <p><strong>Prerequisites</strong></p>
 
 <ol>
-<li>Download and install <a href="http://www.jrsoftware.org/isinfo.html" target="955889774">Inno Setup 5</a>.</li>
-<li>Download and install <a href="http://www.activestate.com/store/activeperl/download/" target="761461853">ActiveState ActivePerl</a>.</li>
+<li>Download and install <a href="http://www.jrsoftware.org/isinfo.html" target="978164732">Inno Setup 5</a>.</li>
+<li>Download and install <a href="http://www.activestate.com/store/activeperl/download/" target="2124049341">ActiveState ActivePerl</a>.</li>
 </ol>
 
 <p><strong>Run the Configure Wizard</strong></p>
@@ -403,7 +405,7 @@ run_demos.bat
 
 <p>Chances are the download, configure, build, and install of ImageMagick went flawlessly as it is intended, however, certain systems and environments may cause one or more steps to fail.  We discuss a few problems we've run across and how to take corrective action to ensure you have a working release of ImageMagick.</p>
 
-<p>If the compiler generates an error or if it quits unexpectedly, go to the <a href="http://msdn.microsoft.com/vstudio/" target="622228333">Visual Studio</a> web site and look for Visual Studio service packs.  Chances are, after you download and install all the Visual Studio service packs, ImageMagick will compile and build as expected.</p>
+<p>If the compiler generates an error or if it quits unexpectedly, go to the <a href="http://msdn.microsoft.com/vstudio/" target="83250593">Visual Studio</a> web site and look for Visual Studio service packs.  Chances are, after you download and install all the Visual Studio service packs, ImageMagick will compile and build as expected.</p>
       </td>
       <td id="margin" width="1%" height="100%" valign="top" align="right">&nbsp;</td>
     </tr>
@@ -415,10 +417,10 @@ run_demos.bat
       </font>
     </span>
     <span id="linkbar-center">
-      <a href="http://www.imagemagick.org/discourse-server/" target="58540956">Discourse Server</a> &bull;
+      <a href="http://www.imagemagick.org/discourse-server/" target="882468664">Discourse Server</a> &bull;
       <a href="../www/mailing-list.html">Mailing Lists</a> &bull;
-      <a href="http://cafe.imagemagick.org" target="119243566">Cafe</a> &bull;
-    <a href="http://www.imagemagick.org/MagickStudio/scripts/MagickStudio.cgi" target="469546832">Studio</a>
+      <a href="http://cafe.imagemagick.org" target="1613132177">Cafe</a> &bull;
+    <a href="http://studio.webbyland.com/ImageMagick/MagickStudio/scripts/MagickStudio.cgi" target="875010321">Studio</a>
     </span>
     <span id="linkbar-east">
       <font size="-1">

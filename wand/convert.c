@@ -342,6 +342,7 @@ static void ConvertUsage(void)
       "-intent type         type of rendering intent when managing the image color",
       "-interlace type      type of image interlacing scheme",
       "-interpolate method  pixel color interpolation method",
+      "-kerning value       set the space between two letters",
       "-label string        assign a label to an image",
       "-limit type value    pixel cache resource limit",
       "-loop iterations     add Netscape loop extension to your GIF animation",
@@ -1537,6 +1538,21 @@ WandExport MagickBooleanType ConvertImageCommand(ImageInfo *image_info,
             if (interpolate < 0)
               ThrowConvertException(OptionError,"UnrecognizedInterpolateMethod",
                 argv[i]);
+            break;
+          }
+        ThrowConvertException(OptionError,"UnrecognizedOption",option)
+      }
+      case 'k':
+      {
+        if (LocaleCompare("kerning",option+1) == 0)
+          {
+            if (*option == '+')
+              break;
+            i++;
+            if (i == (long) (argc-1))
+              ThrowConvertException(OptionError,"MissingArgument",option);
+            if (IsGeometry(argv[i]) == MagickFalse)
+              ThrowConvertInvalidArgumentException(option,argv[i]);
             break;
           }
         ThrowConvertException(OptionError,"UnrecognizedOption",option)

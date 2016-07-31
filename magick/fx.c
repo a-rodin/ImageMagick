@@ -3289,8 +3289,7 @@ MagickExport Image *ImplodeImage(const Image *image,const double amount,
     (void) LogMagickEvent(TraceEvent,GetMagickModule(),"%s",image->filename);
   assert(exception != (ExceptionInfo *) NULL);
   assert(exception->signature == MagickSignature);
-  implode_image=CloneImage(image,image->columns,image->rows,MagickTrue,
-    exception);
+  implode_image=CloneImage(image,0,0,MagickTrue,exception);
   if (implode_image == (Image *) NULL)
     return((Image *) NULL);
   if (SetImageStorageClass(implode_image,DirectClass) == MagickFalse)
@@ -3340,12 +3339,6 @@ MagickExport Image *ImplodeImage(const Image *image,const double amount,
     PointInfo
       delta;
 
-    register const IndexPacket
-      *indexes;
-
-    register const PixelPacket
-      *p;
-
     register IndexPacket
       *implode_indexes;
 
@@ -3358,7 +3351,7 @@ MagickExport Image *ImplodeImage(const Image *image,const double amount,
 
     if (status == MagickFalse)
       continue;
-    q=QueueCacheViewAuthenticPixels(implode_view,0,y,implode_image->columns,1,
+    q=GetCacheViewAuthenticPixels(implode_view,0,y,implode_image->columns,1,
       exception);
     if (q == (PixelPacket *) NULL)
       {
@@ -3376,15 +3369,7 @@ MagickExport Image *ImplodeImage(const Image *image,const double amount,
       */
       delta.x=scale.x*(double) (x-center.x);
       distance=delta.x*delta.x+delta.y*delta.y;
-      if (distance >= (radius*radius))
-        {
-          p=GetCacheViewVirtualPixels(image_view,x,y,1,1,exception);
-          if (p == (const PixelPacket *) NULL)
-            break;
-          indexes=GetCacheViewVirtualIndexQueue(image_view);
-          SetMagickPixelPacket(image,p,indexes,&pixel);
-        }
-      else
+      if (distance < (radius*radius))
         {
           double
             factor;
@@ -3399,8 +3384,8 @@ MagickExport Image *ImplodeImage(const Image *image,const double amount,
           (void) ResamplePixelColor(resample_filter[id],(double)
             (factor*delta.x/scale.x+center.x),(double) (factor*delta.y/
             scale.y+center.y),&pixel);
+          SetPixelPacket(implode_image,&pixel,q,implode_indexes+x);
         }
-      SetPixelPacket(implode_image,&pixel,q,implode_indexes+x);
       q++;
     }
     if (SyncCacheViewAuthenticPixels(implode_view,exception) == MagickFalse)
@@ -4993,7 +4978,7 @@ MagickExport Image *SwirlImage(const Image *image,double degrees,
     (void) LogMagickEvent(TraceEvent,GetMagickModule(),"%s",image->filename);
   assert(exception != (ExceptionInfo *) NULL);
   assert(exception->signature == MagickSignature);
-  swirl_image=CloneImage(image,image->columns,image->rows,MagickTrue,exception);
+  swirl_image=CloneImage(image,0,0,MagickTrue,exception);
   if (swirl_image == (Image *) NULL)
     return((Image *) NULL);
   if (SetImageStorageClass(swirl_image,DirectClass) == MagickFalse)
@@ -5041,12 +5026,6 @@ MagickExport Image *SwirlImage(const Image *image,double degrees,
     PointInfo
       delta;
 
-    register const IndexPacket
-      *indexes;
-
-    register const PixelPacket
-      *p;
-
     register IndexPacket
       *swirl_indexes;
 
@@ -5059,7 +5038,7 @@ MagickExport Image *SwirlImage(const Image *image,double degrees,
 
     if (status == MagickFalse)
       continue;
-    q=QueueCacheViewAuthenticPixels(swirl_view,0,y,swirl_image->columns,1,
+    q=GetCacheViewAuthenticPixels(swirl_view,0,y,swirl_image->columns,1,
       exception);
     if (q == (PixelPacket *) NULL)
       {
@@ -5077,15 +5056,7 @@ MagickExport Image *SwirlImage(const Image *image,double degrees,
       */
       delta.x=scale.x*(double) (x-center.x);
       distance=delta.x*delta.x+delta.y*delta.y;
-      if (distance >= (radius*radius))
-        {
-          p=GetCacheViewVirtualPixels(image_view,x,y,1,1,exception);
-          if (p == (const PixelPacket *) NULL)
-            break;
-          indexes=GetCacheViewVirtualIndexQueue(image_view);
-          SetMagickPixelPacket(image,p,indexes,&pixel);
-        }
-      else
+      if (distance < (radius*radius))
         {
           MagickRealType
             cosine,
@@ -5101,8 +5072,8 @@ MagickExport Image *SwirlImage(const Image *image,double degrees,
           (void) ResamplePixelColor(resample_filter[id],(double) ((cosine*
             delta.x-sine*delta.y)/scale.x+center.x),(double) ((sine*delta.x+
             cosine*delta.y)/scale.y+center.y),&pixel);
+          SetPixelPacket(swirl_image,&pixel,q,swirl_indexes+x);
         }
-      SetPixelPacket(swirl_image,&pixel,q,swirl_indexes+x);
       q++;
     }
     if (SyncCacheViewAuthenticPixels(swirl_view,exception) == MagickFalse)

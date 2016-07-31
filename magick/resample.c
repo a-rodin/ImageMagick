@@ -479,7 +479,8 @@ static MagickBooleanType InterpolateResampleFilter(
         gamma;
 
       PointInfo
-        delta;
+        delta,
+        epsilon;
 
       p=GetCacheViewVirtualPixels(resample_filter->view,(long) floor(x),(long)
         floor(y),2,2,resample_filter->exception);
@@ -514,25 +515,26 @@ static MagickBooleanType InterpolateResampleFilter(
         }
       delta.x=x-floor(x);
       delta.y=y-floor(y);
-      gamma=(((1.0-delta.y)*((1.0-delta.x)*alpha[0]+delta.x*alpha[1])+delta.y*
-        ((1.0-delta.x)*alpha[2]+delta.x*alpha[3])));
+      epsilon.x=1.0-delta.x;
+      epsilon.y=1.0-delta.y;
+      gamma=((epsilon.y*(epsilon.x*alpha[0]+delta.x*alpha[1])+delta.y*
+        (epsilon.x*alpha[2]+delta.x*alpha[3])));
       gamma=1.0/(fabs((double) gamma) <= MagickEpsilon ? 1.0 : gamma);
-      pixel->red=gamma*((1.0-delta.y)*((1.0-delta.x)*pixels[0].red+delta.x*
-        pixels[1].red)+delta.y*((1.0-delta.x)*pixels[2].red+delta.x*
-        pixels[3].red));
-      pixel->green=gamma*((1.0-delta.y)*((1.0-delta.x)*pixels[0].green+delta.x*
-        pixels[1].green)+delta.y*((1.0-delta.x)*pixels[2].green+
-        delta.x*pixels[3].green));
-      pixel->blue=gamma*((1.0-delta.y)*((1.0-delta.x)*pixels[0].blue+delta.x*
-        pixels[1].blue)+delta.y*((1.0-delta.x)*pixels[2].blue+delta.x*
+      pixel->red=gamma*(epsilon.y*(epsilon.x*pixels[0].red+delta.x*
+        pixels[1].red)+delta.y*(epsilon.x*pixels[2].red+delta.x*pixels[3].red));
+      pixel->green=gamma*(epsilon.y*(epsilon.x*pixels[0].green+delta.x*
+        pixels[1].green)+delta.y*(epsilon.x*pixels[2].green+delta.x*
+        pixels[3].green));
+      pixel->blue=gamma*(epsilon.y*(epsilon.x*pixels[0].blue+delta.x*
+        pixels[1].blue)+delta.y*(epsilon.x*pixels[2].blue+delta.x*
         pixels[3].blue));
-      pixel->opacity=((1.0-delta.y)*((1.0-delta.x)*pixels[0].opacity+delta.x*
-        pixels[1].opacity)+delta.y*((1.0-delta.x)*pixels[2].opacity+delta.x*
+      pixel->opacity=(epsilon.y*(epsilon.x*pixels[0].opacity+delta.x*
+        pixels[1].opacity)+delta.y*(epsilon.x*pixels[2].opacity+delta.x*
         pixels[3].opacity));
       if (resample_filter->image->colorspace == CMYKColorspace)
-        pixel->index=gamma*((1.0-delta.y)*((1.0-delta.x)*pixels[0].index+
-          delta.x*pixels[1].index)+delta.y*((1.0-delta.x)*pixels[2].index+
-          delta.x*pixels[3].index));
+        pixel->index=gamma*(epsilon.y*(epsilon.x*pixels[0].index+delta.x*
+          pixels[1].index)+delta.y*(epsilon.x*pixels[2].index+delta.x*
+          pixels[3].index));
       break;
     }
     case FilterInterpolatePixel:

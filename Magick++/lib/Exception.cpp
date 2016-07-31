@@ -271,6 +271,7 @@ MagickDLLDecl void Magick::throwExceptionExplicit( const ExceptionType severity_
   GetExceptionInfo( &exception );
   ThrowException( &exception, severity_, reason_, description_ );
   throwException( exception );
+  (void) DestroyExceptionInfo( &exception );
 }
 
 // Throw C++ exception
@@ -292,8 +293,10 @@ MagickDLLDecl void Magick::throwException( ExceptionInfo &exception_ )
     message += " (" + std::string(exception_.description) + ")";
 
   ExceptionType severity = exception_.severity;
+  MagickBooleanType relinquish = exception_.relinquish;
   DestroyExceptionInfo( &exception_ );
-  GetExceptionInfo( &exception_ );
+  if (relinquish)
+    GetExceptionInfo( &exception_ );
 
   switch ( severity )
     {

@@ -1066,7 +1066,10 @@ static MagickBooleanType LoadTypeList(const char *xml,const char *filename,
                   if (*path != '\0')
                     (void) ConcatenateMagickString(path,DirectorySeparator,
                       MaxTextExtent);
-                  (void) ConcatenateMagickString(path,token,MaxTextExtent);
+                  if (*token == *DirectorySeparator)
+                    (void) CopyMagickString(path,token,MaxTextExtent);
+                  else
+                    (void) ConcatenateMagickString(path,token,MaxTextExtent);
                   sans_exception=AcquireExceptionInfo();
                   xml=FileToString(path,~0,sans_exception);
                   sans_exception=DestroyExceptionInfo(sans_exception);

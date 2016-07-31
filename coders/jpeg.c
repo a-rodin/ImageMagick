@@ -924,7 +924,7 @@ static Image *ReadJPEGImage(const ImageInfo *image_info,
              image->quality=(unsigned long) i+1;
            if (image->debug != MagickFalse)
              {
-               if ((value > hash[i]) || (sum > sums[i]))
+               if (image->quality != UndefinedCompressionQuality)
                  (void) LogMagickEvent(CoderEvent,GetMagickModule(),
                    "Quality: %ld",image->quality);
                else
@@ -1777,7 +1777,7 @@ static MagickBooleanType WriteJPEGImage(const ImageInfo *image_info,
       (image->quality <= 100))
     {
       if (image->quality == UndefinedCompressionQuality)
-        jpeg_set_quality(&jpeg_info,85,MagickTrue);
+        jpeg_set_quality(&jpeg_info,92,MagickTrue);
       else
         jpeg_set_quality(&jpeg_info,(int) image->quality,MagickTrue);
       if (image->debug != MagickFalse)

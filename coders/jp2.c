@@ -342,6 +342,10 @@ static Image *ReadJP2Image(const ImageInfo *image_info,ExceptionInfo *exception)
   MagickBooleanType
     status;
 
+  QuantumAny
+    pixel,
+    scale[4];
+
   register long
     i,
     x;
@@ -352,7 +356,6 @@ static Image *ReadJP2Image(const ImageInfo *image_info,ExceptionInfo *exception)
   unsigned long
     maximum_component_depth,
     number_components,
-    scale[4],
     x_step[4],
     y_step[4];
 
@@ -452,13 +455,17 @@ static Image *ReadJP2Image(const ImageInfo *image_info,ExceptionInfo *exception)
   image->compression=JPEG2000Compression;
   for (i=0; i < (long) number_components; i++)
   {
-    if ((((long) (jas_image_cmptwidth(jp2_image,components[i])*
-          jas_image_cmpthstep(jp2_image,components[i])) != (long) image->columns)) ||
-        (((long) (jas_image_cmptheight(jp2_image,components[i])*
-          jas_image_cmptvstep(jp2_image,components[i])) != (long) image->rows)) ||
+    unsigned long
+      height,
+      width;
+
+    width=(unsigned long) (jas_image_cmptwidth(jp2_image,components[i])*
+      jas_image_cmpthstep(jp2_image,components[i]));
+    height=(unsigned long) (jas_image_cmptheight(jp2_image,components[i])*
+      jas_image_cmptvstep(jp2_image,components[i]));
+    if ((width != image->columns) || (height != image->rows) ||
         (jas_image_cmpttlx(jp2_image,components[i]) != 0) ||
-        (jas_image_cmpttly(jp2_image,components[i]) != 0) ||
-        (jas_image_cmptsgnd(jp2_image,components[i]) != MagickFalse))
+        (jas_image_cmpttly(jp2_image,components[i]) != 0))
       {
         (void) jas_stream_close(jp2_stream);
         jas_image_destroy(jp2_image);
@@ -495,17 +502,8 @@ static Image *ReadJP2Image(const ImageInfo *image_info,ExceptionInfo *exception)
   else
     image->depth=(unsigned long) MagickMin(MAGICKCORE_QUANTUM_DEPTH,16);
   for (i=0; i < (long) number_components; i++)
-  {
-    scale[i]=1;
-    if (jas_image_cmptprec(jp2_image,components[i]) < 16)
-      scale[i]=(1U << (16-jas_image_cmptprec(jp2_image,components[i])))+1;
-  }
-  if (number_components == 1)
-    {
-      image->colors=(image->depth == 8 ? 256UL : MaxColormapSize);
-      if (AcquireImageColormap(image,image->colors) == MagickFalse)
-        ThrowReaderException(ResourceLimitError,"MemoryAllocationFailed");
-    }
+    scale[i]=GetQuantumScale((unsigned long) jas_image_cmptprec(jp2_image,
+      components[i]));
   for (y=0; y < (long) image->rows; y++)
   {
     q=GetAuthenticPixels(image,0,y,image->columns,1,exception);
@@ -519,34 +517,17 @@ static Image *ReadJP2Image(const ImageInfo *image_info,ExceptionInfo *exception)
     {
       case 1:
       {
-        register IndexPacket
-          *indexes;
-
-        IndexPacket
-          index;
-
         /*
           Grayscale.
         */
-        indexes=GetAuthenticIndexQueue(image);
-        if (image->depth == 8)
-          for (x=0; x < (long) image->columns; x++)
-          {
-            index=ScaleQuantumToChar(ScaleShortToQuantum((unsigned short)
-              (scale[0]*jas_matrix_getv(pixels[0],x))));
-            index=ConstrainColormapIndex(image,index);
-            indexes[x]=index;
-            *q++=image->colormap[(long) index];
-          }
-        else
-          for (x=0; x < (long) image->columns; x++)
-          {
-            index=(unsigned short) (scale[0]*jas_matrix_getv(pixels[0],x/
-              x_step[0]));
-            index=ConstrainColormapIndex(image,index);
-            indexes[x]=index;
-            *q++=image->colormap[(long) index];
-          }
+        for (x=0; x < (long) image->columns; x++)
+        {
+          pixel=(QuantumAny) jas_matrix_getv(pixels[0],x/x_step[0]);
+          q->red=ScaleAnyToQuantum(pixel,image->depth,scale[0]);
+          q->green=q->red;
+          q->blue=q->red;
+          q++;
+        }
         break;
       }
       case 3:
@@ -556,12 +537,12 @@ static Image *ReadJP2Image(const ImageInfo *image_info,ExceptionInfo *exception)
         */
         for (x=0; x < (long) image->columns; x++)
         {
-          q->red=ScaleShortToQuantum((unsigned short) (scale[0]*
-            jas_matrix_getv(pixels[0],x/x_step[0])));
-          q->green=ScaleShortToQuantum((unsigned short) (scale[1]*
-            jas_matrix_getv(pixels[1],x/x_step[1])));
-          q->blue=ScaleShortToQuantum((unsigned short) (scale[2]*
-            jas_matrix_getv(pixels[2],x/x_step[2])));
+          pixel=(QuantumAny) jas_matrix_getv(pixels[0],x/x_step[0]);
+          q->red=ScaleAnyToQuantum(pixel,image->depth,scale[0]);
+          pixel=(QuantumAny) jas_matrix_getv(pixels[1],x/x_step[1]);
+          q->green=ScaleAnyToQuantum(pixel,image->depth,scale[1]);
+          pixel=(QuantumAny) jas_matrix_getv(pixels[2],x/x_step[2]);
+          q->blue=ScaleAnyToQuantum(pixel,image->depth,scale[2]);
           q++;
         }
         break;
@@ -573,14 +554,14 @@ static Image *ReadJP2Image(const ImageInfo *image_info,ExceptionInfo *exception)
         */
         for (x=0; x < (long) image->columns; x++)
         {
-          q->red=ScaleShortToQuantum((unsigned short) (scale[0]*
-            jas_matrix_getv(pixels[0],x/x_step[0])));
-          q->green=ScaleShortToQuantum((unsigned short) (scale[1]*
-            jas_matrix_getv(pixels[1],x/x_step[1])));
-          q->blue=ScaleShortToQuantum((unsigned short) (scale[2]*
-            jas_matrix_getv(pixels[2],x/x_step[2])));
-          q->opacity=(Quantum) QuantumRange-ScaleShortToQuantum((unsigned short)
-            (scale[3]*jas_matrix_getv(pixels[3],x/x_step[3])));
+          pixel=(QuantumAny) jas_matrix_getv(pixels[0],x/x_step[0]);
+          q->red=ScaleAnyToQuantum(pixel,image->depth,scale[0]);
+          pixel=(QuantumAny) jas_matrix_getv(pixels[1],x/x_step[1]);
+          q->green=ScaleAnyToQuantum(pixel,image->depth,scale[1]);
+          pixel=(QuantumAny) jas_matrix_getv(pixels[2],x/x_step[2]);
+          q->blue=ScaleAnyToQuantum(pixel,image->depth,scale[2]);
+          pixel=(QuantumAny) jas_matrix_getv(pixels[3],x/x_step[3]);
+          q->opacity=ScaleAnyToQuantum(pixel,image->depth,scale[3]);
           q++;
         }
         break;

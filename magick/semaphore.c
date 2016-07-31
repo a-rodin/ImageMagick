@@ -166,11 +166,6 @@ MagickExport void AcquireSemaphoreInfo(SemaphoreInfo **semaphore_info)
 %
 %      SemaphoreInfo *AllocateSemaphoreInfo(void)
 %
-%  A description of each parameter follows:
-%
-%    o semaphore_info: Method AllocateSemaphoreInfo returns a pointer to an
-%      initialized SemaphoreInfo structure.
-%
 */
 MagickExport SemaphoreInfo *AllocateSemaphoreInfo(void)
 {

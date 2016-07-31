@@ -1466,6 +1466,9 @@ static MagickBooleanType GetEXIFProperty(const Image *image,
 static MagickBooleanType GetXMPProperty(const Image *image,
   const char *property)
 {
+  char
+    *xmp_profile;
+
   const StringInfo
     *profile;
 
@@ -1477,9 +1480,6 @@ static MagickBooleanType GetXMPProperty(const Image *image,
 
   register const char
     *p;
-
-  register long
-    i;
 
   XMLTreeInfo
     *child,
@@ -1493,15 +1493,15 @@ static MagickBooleanType GetXMPProperty(const Image *image,
     return(MagickFalse);
   if ((property == (const char *) NULL) || (*property == '\0'))
     return(MagickFalse);
-  exception=AcquireExceptionInfo();
-  p=(const char *) GetStringInfoDatum(profile);
-  for (i=0; i < (long) (GetStringInfoLength(profile)-1); i++)
-  {
+  xmp_profile=StringInfoToString(profile);
+  if (xmp_profile == (char *) NULL)
+    return(MagickFalse);
+  for (p=xmp_profile; *p != '\0'; p++)
     if ((*p == '<') && (*(p+1) == 'x'))
       break;
-    p++;
-  }
+  exception=AcquireExceptionInfo();
   xmp=NewXMLTree((char *) p,exception);
+  xmp_profile=DestroyString(xmp_profile);
   exception=DestroyExceptionInfo(exception);
   if (xmp == (XMLTreeInfo *) NULL)
     return(MagickFalse);

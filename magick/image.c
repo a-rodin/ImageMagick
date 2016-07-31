@@ -179,7 +179,7 @@ MagickExport Image *AcquireImage(const ImageInfo *image_info)
   image->y_resolution=DefaultResolution;
   image->units=PixelsPerInchResolution;
   GetTimerInfo(&image->timer);
-  (void) GetPixelCacheInfo(&image->cache,0);
+  image->cache=AcquirePixelCacheInfo(0);
   image->blob=CloneBlobInfo((BlobInfo *) NULL);
   image->debug=IsEventLogging();
   image->reference_count=1;
@@ -341,9 +341,6 @@ MagickExport MagickBooleanType AcquireImageColormap(Image *image,
   if (image->colormap == (PixelPacket *) NULL)
     ThrowBinaryException(ResourceLimitError,"MemoryAllocationFailed",
       image->filename);
-#if defined(MAGICKCORE_OPENMP_SUPPORT)
-  #pragma omp parallel for
-#endif
   for (i=0; i < (long) image->colors; i++)
   {
     unsigned long
@@ -1155,7 +1152,7 @@ MagickExport Image *CloneImage(const Image *image,const unsigned long columns,
   clone_image->page.height=(unsigned long) (scale*image->page.height+0.5);
   clone_image->page.y=(long) (image->page.y*scale+0.5);
   clone_image->tile_offset.y=(long) (scale*image->tile_offset.y+0.5);
-  (void) GetPixelCacheInfo(&clone_image->cache,0);
+  clone_image->cache=AcquirePixelCacheInfo(0);
   return(clone_image);
 }
 
@@ -3575,9 +3572,6 @@ MagickExport MagickBooleanType SetImageInfo(ImageInfo *image_info,
         Look for explicit image formats.
       */
       format_type=UndefinedFormatType;
-      if ((LocaleNCompare(image_info->magick,"SGI",3) == 0) &&
-          (LocaleCompare(magic,"RGB") == 0))
-        format_type=ExplicitFormatType;
       i=0;
       while ((format_type != UndefinedFormatType) &&
              (format_type_formats[i] != (char *) NULL))
@@ -3599,6 +3593,8 @@ MagickExport MagickBooleanType SetImageInfo(ImageInfo *image_info,
             image_info->affirm=MagickTrue;
             (void) CopyMagickString(image_info->magick,magic,MaxTextExtent);
           }
+      if (LocaleCompare(magic,"RGB") == 0)
+        image_info->affirm=MagickFalse;  /* maybe SGI disguised as RGB */
     }
   /*
     Look for explicit 'format:image' in filename.

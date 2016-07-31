@@ -30,8 +30,8 @@ extern "C" {
 #define MagickLibVersion  0x647
 #define MagickLibVersionText  "6.4.7"
 #define MagickLibVersionNumber  1,0,0
-#define MagickReleaseDate  "2008-12-06"
-#define MagickChangeDate   "20081205"
+#define MagickReleaseDate  "2008-12-14"
+#define MagickChangeDate   "20081212"
 #if (MAGICKCORE_QUANTUM_DEPTH == 8)
 #define MagickQuantumDepth  "Q8"
 #define MagickQuantumRange  "255"

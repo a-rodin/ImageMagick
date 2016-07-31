@@ -265,7 +265,7 @@ static struct
       {"weight", IntegerReference}, {"align", MagickAlignOptions},
       {"encoding", StringReference}, {"affine", ArrayReference},
       {"fill-pattern", ImageReference}, {"stroke-pattern", ImageReference},
-      {"tile", ImageReference} } },
+      {"tile", ImageReference}, {"kerning", RealReference} } },
     { "ColorFloodfill", { {"geometry", StringReference},
       {"x", IntegerReference}, {"y", IntegerReference},
       {"fill", StringReference}, {"bordercolor", StringReference},
@@ -296,7 +296,7 @@ static struct
       {"interpolate", MagickInterpolateOptions},
       {"origin", StringReference}, {"text", StringReference},
       {"fill-pattern", ImageReference}, {"stroke-pattern", ImageReference},
-      {"vector-graphics", StringReference} } },
+      {"vector-graphics", StringReference}, {"kerning", RealReference} } },
     { "Equalize", { {"channel", MagickChannelOptions} } },
     { "Gamma", { {"gamma", StringReference}, {"channel", MagickChannelOptions},
       {"red", RealReference}, {"green", RealReference},
@@ -7264,6 +7264,8 @@ Mogrify(ref,...)
           if (attribute_flag[27] != 0)
             draw_info->stroke_pattern=CloneImage(
               argument_list[27].image_reference,0,0,MagickTrue,exception);
+          if (attribute_flag[29] != 0)
+            draw_info->kerning=argument_list[29].real_reference;
           (void) AnnotateImage(image,draw_info);
           draw_info=DestroyDrawInfo(draw_info);
           break;
@@ -7717,6 +7719,8 @@ Mogrify(ref,...)
           if (attribute_flag[28] != 0)
             (void) CloneString(&draw_info->primitive,
               argument_list[28].string_reference);
+          if (attribute_flag[29] != 0)
+            draw_info->kerning=argument_list[29].real_reference;
           DrawImage(image,draw_info);
           draw_info=DestroyDrawInfo(draw_info);
           break;
@@ -10781,6 +10785,19 @@ QueryFontMetrics(ref,...)
             {
               draw_info->gravity=(GravityType) ParseMagickOption(
                 MagickGravityOptions,MagickFalse,SvPV(ST(i),na));
+              break;
+            }
+          ThrowPerlException(exception,OptionError,"UnrecognizedAttribute",
+            attribute);
+          break;
+        }
+        case 'k':
+        case 'K':
+        {
+          if (LocaleCompare(attribute,"kerning") == 0)
+            {
+              flags=ParseGeometry(SvPV(ST(i),na),&geometry_info);
+              draw_info->kerning=geometry_info.rho;
               break;
             }
           ThrowPerlException(exception,OptionError,"UnrecognizedAttribute",

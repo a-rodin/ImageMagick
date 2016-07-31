@@ -315,6 +315,9 @@ typedef struct _DrawInfo
 
   unsigned long
     signature;
+
+  double
+    kerning;
 } DrawInfo;
 
 typedef struct _PrimitiveInfo

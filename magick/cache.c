@@ -119,7 +119,7 @@ static MagickBooleanType
   OpenPixelCache(Image *,const MapMode,ExceptionInfo *),
   ReadPixelCacheIndexes(CacheInfo *,NexusInfo *,ExceptionInfo *),
   ReadPixelCachePixels(CacheInfo *,NexusInfo *,ExceptionInfo *),
-  SyncAuthenticPixelCache(Image *,ExceptionInfo *),
+  SyncAuthenticPixelsCache(Image *,ExceptionInfo *),
   WritePixelCacheIndexes(CacheInfo *,NexusInfo *,ExceptionInfo *),
   WritePixelCachePixels(CacheInfo *,NexusInfo *,ExceptionInfo *);
 
@@ -179,6 +179,76 @@ MagickExport void SetPixelCacheMaximumThreads(const unsigned long threads)
 #else
   (void) threads;
 #endif
+}
+
+/*
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                                             %
+%                                                                             %
+%                                                                             %
++   A c q u i r e P i x e l C a c h e I n f o                                 %
+%                                                                             %
+%                                                                             %
+%                                                                             %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%  AcquirePixelCacheInfo() acquires a pixel cache.
+%
+%  The format of the AcquirePixelCacheInfo() method is:
+%
+%      Cache AcquirePixelCacheInfo(const unsigned long number_threads)
+%
+%  A description of each parameter follows:
+%
+%    o number_threads: the number of nexus threads.
+%
+*/
+MagickExport Cache AcquirePixelCacheInfo(const unsigned long number_threads)
+{
+  CacheInfo
+    *cache_info;
+
+  cache_info=(CacheInfo *) AcquireMagickMemory(sizeof(*cache_info));
+  if (cache_info == (CacheInfo *) NULL)
+    ThrowFatalException(ResourceLimitFatalError,"MemoryAllocationFailed");
+  (void) ResetMagickMemory(cache_info,0,sizeof(*cache_info));
+  cache_info->type=UndefinedCache;
+  cache_info->colorspace=RGBColorspace;
+  cache_info->file=(-1);
+#if defined(MAGICKCORE_HAVE_PTHREAD)
+  cache_info->id=pthread_self();
+#elif defined(__WINDOWS__)
+  cache_info->id=GetCurrentThreadId();
+#else
+  cache_info->id=getpid();
+#endif
+  cache_info->number_threads=number_threads;
+  if (number_threads == 0)
+    cache_info->number_threads=GetPixelCacheMaximumThreads();
+  cache_info->nexus_info=AcquirePixelCacheNexus(cache_info->number_threads);
+  if (cache_info->nexus_info == (NexusInfo **) NULL)
+    ThrowFatalException(ResourceLimitFatalError,"MemoryAllocationFailed");
+  GetPixelCacheMethods(&cache_info->methods);
+  cache_info->reference_count=1;
+  cache_info->semaphore=AllocateSemaphoreInfo();
+  cache_info->disk_semaphore=AllocateSemaphoreInfo();
+  cache_info->debug=IsEventLogging();
+  cache_info->signature=MagickSignature;
+  if ((cache_resources == (SplayTreeInfo *) NULL) &&
+      (instantiate_cache == MagickFalse))
+    {
+      AcquireSemaphoreInfo(&cache_semaphore);
+      if ((cache_resources == (SplayTreeInfo *) NULL) &&
+          (instantiate_cache == MagickFalse))
+        {
+          cache_resources=NewSplayTree((int (*)(const void *,const void *))
+            NULL,(void *(*)(void *)) NULL,(void *(*)(void *)) NULL);
+          instantiate_cache=MagickTrue;
+        }
+      RelinquishSemaphoreInfo(cache_semaphore);
+    }
+  (void) AddValueToSplayTree(cache_resources,cache_info,cache_info);
+  return((Cache ) cache_info);
 }
 
 /*
@@ -360,7 +430,8 @@ static MagickBooleanType ClipPixelCacheNexus(Image *image,
 %
 */
 
-static inline void GetVirtualPixelsFromNexusPixels(NexusInfo *nexus_info)
+static inline MagickBooleanType GetVirtualPixelsFromNexusPixels(
+  NexusInfo *nexus_info)
 {
   if (nexus_info->length != (MagickSizeType) ((size_t) nexus_info->length))
     ThrowFatalException(ResourceLimitFatalError,"MemoryAllocationFailed");
@@ -373,6 +444,7 @@ static inline void GetVirtualPixelsFromNexusPixels(NexusInfo *nexus_info)
       nexus_info->cache=(PixelPacket *) MapBlob(-1,IOMode,0,(size_t)
         nexus_info->length);
     }
+  return(nexus_info->cache == (PixelPacket *) NULL ? MagickFalse : MagickTrue);
 }
 
 static MagickBooleanType ClonePixelCacheNexus(CacheInfo *destination,
@@ -409,10 +481,8 @@ static MagickBooleanType ClonePixelCacheNexus(CacheInfo *destination,
     q->indexes=p->indexes;
     if (p->cache != (PixelPacket *) NULL)
       {
-        GetVirtualPixelsFromNexusPixels(q);
-        if (q->cache == (PixelPacket *) NULL)
-          status=MagickFalse;
-        else
+        status=GetVirtualPixelsFromNexusPixels(q);
+        if (status != MagickFalse)
           {
             (void) CopyMagickMemory(q->cache,p->cache,(size_t) p->length);
             q->pixels=q->cache;
@@ -2003,8 +2073,7 @@ MagickExport Cache GetImagePixelCache(Image *image,ExceptionInfo *exception)
             Clone pixel cache.
           */
           clone_image=(*image);
-          (void) GetPixelCacheInfo(&clone_image.cache,
-            cache_info->number_threads);
+          clone_image.cache=AcquirePixelCacheInfo(cache_info->number_threads);
           clone_info=(CacheInfo *) clone_image.cache;
           status=ClonePixelCacheNexus(cache_info,clone_info);
           if (status != MagickFalse)
@@ -2417,88 +2486,6 @@ MagickExport ColorspaceType GetPixelCacheColorspace(const Cache cache)
 %                                                                             %
 %                                                                             %
 %                                                                             %
-+   G e t P i x e l C a c h e I n f o                                         %
-%                                                                             %
-%                                                                             %
-%                                                                             %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
-%  GetPixelCacheInfo() initializes the pixel cache.
-%
-%  The format of the GetPixelCacheInfo() method is:
-%
-%      MagickBooleanTYpe GetPixelCacheInfo(Cache *cache,
-%        const unsigned long number_threads)
-%
-%  A description of each parameter follows:
-%
-%    o cache: the pixel cache.
-%
-%    o number_threads: the number of nexus threads.
-%
-*/
-MagickExport MagickBooleanType GetPixelCacheInfo(Cache *cache,
-  const unsigned long number_threads)
-{
-  CacheInfo
-    *cache_info;
-
-  MagickBooleanType
-    status;
-
-  assert(cache != (Cache) NULL);
-  cache_info=(CacheInfo *) AcquireMagickMemory(sizeof(*cache_info));
-  if (cache_info == (CacheInfo *) NULL)
-    ThrowFatalException(ResourceLimitFatalError,"MemoryAllocationFailed");
-  (void) ResetMagickMemory(cache_info,0,sizeof(*cache_info));
-  cache_info->type=UndefinedCache;
-  cache_info->colorspace=RGBColorspace;
-  cache_info->reference_count=1;
-  cache_info->file=(-1);
-#if defined(MAGICKCORE_HAVE_PTHREAD)
-  cache_info->id=pthread_self();
-#elif defined(__WINDOWS__)
-  cache_info->id=GetCurrentThreadId();
-#else
-  cache_info->id=getpid();
-#endif
-  cache_info->semaphore=AllocateSemaphoreInfo();
-  cache_info->disk_semaphore=AllocateSemaphoreInfo();
-  /*
-    Allocate cache nexus.
-  */
-  cache_info->number_threads=number_threads;
-  if (number_threads == 0)
-    cache_info->number_threads=GetPixelCacheMaximumThreads();
-  cache_info->nexus_info=AcquirePixelCacheNexus(cache_info->number_threads);
-  if (cache_info->nexus_info == (NexusInfo **) NULL)
-    ThrowFatalException(ResourceLimitFatalError,"MemoryAllocationFailed");
-  cache_info->debug=IsEventLogging();
-  cache_info->signature=MagickSignature;
-  GetPixelCacheMethods(&cache_info->methods);
-  *cache=cache_info;
-  if ((cache_resources == (SplayTreeInfo *) NULL) &&
-      (instantiate_cache == MagickFalse))
-    {
-      AcquireSemaphoreInfo(&cache_semaphore);
-      if ((cache_resources == (SplayTreeInfo *) NULL) &&
-          (instantiate_cache == MagickFalse))
-        {
-          cache_resources=NewSplayTree((int (*)(const void *,const void *))
-            NULL,(void *(*)(void *)) NULL,(void *(*)(void *)) NULL);
-          instantiate_cache=MagickTrue;
-        }
-      RelinquishSemaphoreInfo(cache_semaphore);
-    }
-  status=AddValueToSplayTree(cache_resources,*cache,*cache);
-  return(status);
-}
-
-/*
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%                                                                             %
-%                                                                             %
-%                                                                             %
 +   G e t P i x e l C a c h e M e t h o d s                                   %
 %                                                                             %
 %                                                                             %
@@ -2531,7 +2518,7 @@ MagickExport void GetPixelCacheMethods(CacheMethods *cache_methods)
   cache_methods->get_one_authentic_pixel_from_handler=
     GetOneAuthenticPixelFromCache;
   cache_methods->queue_authentic_pixels_handler=QueueAuthenticPixelsCache;
-  cache_methods->sync_authentic_pixels_handler=SyncAuthenticPixelCache;
+  cache_methods->sync_authentic_pixels_handler=SyncAuthenticPixelsCache;
   cache_methods->destroy_pixel_handler=DestroyPixelCache;
 }
 
@@ -4033,7 +4020,7 @@ MagickExport MagickBooleanType PersistPixelCache(Image *image,
   */
   clone_image=(*image);
   clone_info=(CacheInfo *) clone_image.cache;
-  (void) GetPixelCacheInfo(&image->cache,cache_info->number_threads);
+  image->cache=AcquirePixelCacheInfo(cache_info->number_threads);
   cache_info=(CacheInfo *) ReferencePixelCache(image->cache);
   (void) CopyMagickString(cache_info->cache_filename,filename,MaxTextExtent);
   cache_info->type=DiskCache;
@@ -4065,7 +4052,7 @@ MagickExport MagickBooleanType PersistPixelCache(Image *image,
 %  QueueAuthenticNexus() allocates an region to store image pixels as defined
 %  by the region rectangle and returns a pointer to the region.  This region is
 %  subsequently transferred from the pixel cache with
-%  SyncAuthenticPixelCache().  A pointer to the pixels is returned if the
+%  SyncAuthenticPixelsCache().  A pointer to the pixels is returned if the
 %  pixels are transferred, otherwise a NULL is returned.
 %
 %  The format of the QueueAuthenticNexus() method is:
@@ -4143,7 +4130,7 @@ MagickExport PixelPacket *QueueAuthenticNexus(Image *image,const long x,
 %  QueueAuthenticPixelsCache() allocates an region to store image pixels as
 %  defined by the region rectangle and returns a pointer to the region.  This
 %  region is subsequently transferred from the pixel cache with
-%  SyncAuthenticPixelCache().  A pointer to the pixels is returned if the
+%  SyncAuthenticPixelsCache().  A pointer to the pixels is returned if the
 %  pixels are transferred, otherwise a NULL is returned.
 %
 %  The format of the QueueAuthenticPixelsCache() method is:
@@ -4680,6 +4667,9 @@ static PixelPacket *SetPixelCacheNexusPixels(const Image *image,
   CacheInfo
     *cache_info;
 
+  MagickBooleanType
+    status;
+
   MagickOffsetType
     offset;
 
@@ -4742,14 +4732,18 @@ static PixelPacket *SetPixelCacheNexusPixels(const Image *image,
   if (nexus_info->cache == (PixelPacket *) NULL)
     {
       nexus_info->length=length;
-      GetVirtualPixelsFromNexusPixels(nexus_info);
+      status=GetVirtualPixelsFromNexusPixels(nexus_info);
+      if (status == MagickFalse)
+        return((PixelPacket *) NULL);
     }
   else
     if (nexus_info->length != length)
       {
         RelinquishCacheNexusPixels(nexus_info);
         nexus_info->length=length;
-        GetVirtualPixelsFromNexusPixels(nexus_info);
+        status=GetVirtualPixelsFromNexusPixels(nexus_info);
+        if (status == MagickFalse)
+          return((PixelPacket *) NULL);
       }
   nexus_info->pixels=nexus_info->cache;
   nexus_info->indexes=(IndexPacket *) NULL;
@@ -4885,13 +4879,13 @@ MagickExport MagickBooleanType SyncAuthenticPixelCacheNexus(Image *image,
 %                                                                             %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-%  SyncAuthenticPixelCache() saves the authentic image pixels to the in-memory
+%  SyncAuthenticPixelsCache() saves the authentic image pixels to the in-memory
 %  or disk cache.  The method returns MagickTrue if the pixel region is synced,
 %  otherwise MagickFalse.
 %
-%  The format of the SyncAuthenticPixelCache() method is:
+%  The format of the SyncAuthenticPixelsCache() method is:
 %
-%      MagickBooleanType SyncAuthenticPixelCache(Image *image,
+%      MagickBooleanType SyncAuthenticPixelsCache(Image *image,
 %        ExceptionInfo *exception)
 %
 %  A description of each parameter follows:
@@ -4901,7 +4895,7 @@ MagickExport MagickBooleanType SyncAuthenticPixelCacheNexus(Image *image,
 %    o exception: return any errors or warnings in this structure.
 %
 */
-static MagickBooleanType SyncAuthenticPixelCache(Image *image,
+static MagickBooleanType SyncAuthenticPixelsCache(Image *image,
   ExceptionInfo *exception)
 {
   CacheInfo

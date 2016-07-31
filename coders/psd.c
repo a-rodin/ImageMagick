@@ -452,9 +452,6 @@ static MagickBooleanType ParseImageResourceBlocks(Image *image,
   const unsigned char
     *p;
 
-  QuantumInfo
-    quantum_info;
-
   StringInfo
     *profile;
 
@@ -468,7 +465,6 @@ static MagickBooleanType ParseImageResourceBlocks(Image *image,
 
   if (length < 16)
     return(MagickFalse);
-  GetQuantumInfo((const ImageInfo *) NULL,&quantum_info);
   profile=AcquireStringInfo(length);
   SetStringInfoDatum(profile,blocks);
   (void) SetImageProfile(image,"8bim",profile);
@@ -1500,7 +1496,7 @@ static void WriteOneChannel(const ImageInfo *image_info,Image *image,
     y;
 
   QuantumInfo
-    quantum_info;
+    *quantum_info;
 
   register const PixelPacket
     *p;
@@ -1510,17 +1506,18 @@ static void WriteOneChannel(const ImageInfo *image_info,Image *image,
 
   if (tmp_image->depth > 8)
     tmp_image->depth=16;
-  GetQuantumInfo(image_info,&quantum_info);
+  quantum_info=AcquireQuantumInfo(image_info,image);
   packet_size=tmp_image->depth > 8UL ? 2UL : 1UL;
   for (y=0; y < (long) tmp_image->rows; y++)
   {
     p=GetVirtualPixels(tmp_image,0,y,tmp_image->columns,1,&image->exception);
     if (p == (const PixelPacket *) NULL)
     break;
-    (void) ExportQuantumPixels(tmp_image,(ViewInfo *) NULL,&quantum_info,
+    (void) ExportQuantumPixels(tmp_image,(ViewInfo *) NULL,quantum_info,
       quantum_type,pixels,&image->exception);
     (void) WriteBlob(image,packet_size*tmp_image->columns,pixels);
   }
+  quantum_info=DestroyQuantumInfo(quantum_info);
 }
 
 static MagickBooleanType WriteImageChannels(const ImageInfo *image_info,

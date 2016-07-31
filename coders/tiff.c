@@ -333,16 +333,18 @@ static void TIFFGetProfiles(TIFF *tiff,Image *image)
   unsigned char
     *profile;
 
-  length=0;
 #if defined(TIFFTAG_ICCPROFILE)
+  length=0;
   if (TIFFGetField(tiff,TIFFTAG_ICCPROFILE,&length,&profile) == 1)
     (void) ReadProfile(image,"icc",profile,(long) length);
 #endif
 #if defined(TIFFTAG_PHOTOSHOP)
+  length=0;
   if (TIFFGetField(tiff,TIFFTAG_PHOTOSHOP,&length,&profile) == 1)
     (void) ReadProfile(image,"8bim",profile,(long) length);
 #endif
 #if defined(TIFFTAG_RICHTIFFIPTC)
+  length=0;
   if (TIFFGetField(tiff,TIFFTAG_RICHTIFFIPTC,&length,&profile) == 1)
     {
       if (TIFFIsByteSwapped(tiff) != 0)
@@ -351,9 +353,11 @@ static void TIFFGetProfiles(TIFF *tiff,Image *image)
     }
 #endif
 #if defined(TIFFTAG_XMLPACKET)
+  length=0;
   if (TIFFGetField(tiff,TIFFTAG_XMLPACKET,&length,&profile) == 1)
     (void) ReadProfile(image,"xmp",profile,(long) length);
 #endif
+  length=0;
   if (TIFFGetField(tiff,37724,&length,&profile) == 1)
     (void) ReadProfile(image,"tiff:37724",profile,(long) length);
 }
@@ -679,7 +683,7 @@ static Image *ReadTIFFImage(const ImageInfo *image_info,
     }
   do
   {
-    if (image_info->verbose != MagickFalse)
+    if (0 && (image_info->verbose != MagickFalse))
       TIFFPrintDirectory(tiff,stdout,MagickFalse);
     (void) TIFFGetFieldDefaulted(tiff,TIFFTAG_COMPRESSION,&compress_tag);
     (void) TIFFGetFieldDefaulted(tiff,TIFFTAG_ORIENTATION,&orientation);
@@ -929,9 +933,13 @@ static Image *ReadTIFFImage(const ImageInfo *image_info,
     value=(unsigned short) image->scene;
     (void) TIFFGetFieldDefaulted(tiff,TIFFTAG_PAGENUMBER,&value,&pages);
     image->scene=value;
-    if ((image_info->ping != MagickFalse) && (image_info->number_scenes != 0))
-      if (image->scene >= (image_info->scene+image_info->number_scenes-1))
-        break;
+    if (image_info->ping != MagickFalse)
+      {
+        if (image_info->number_scenes != 0)
+          if (image->scene >= (image_info->scene+image_info->number_scenes-1))
+            break;
+        goto next_tiff_frame;
+      }
     method=ReadGenericMethod;
     if (TIFFGetField(tiff,TIFFTAG_ROWSPERSTRIP,&rows_per_strip) != 0)
       {
@@ -1357,6 +1365,7 @@ static Image *ReadTIFFImage(const ImageInfo *image_info,
       }
     }
     SetQuantumImageType(image,quantum_type);
+  next_tiff_frame:
     if ((photometric == PHOTOMETRIC_LOGL) ||
         (photometric == PHOTOMETRIC_MINISBLACK) ||
         (photometric == PHOTOMETRIC_MINISWHITE))
@@ -1457,7 +1466,7 @@ ModuleExport unsigned long RegisterTIFFImage(void)
       i;
 
     p=TIFFGetVersion();
-    for (i=0; (i < MaxTextExtent-1) && (*p != 0) && (*p != '\n'); i++)
+    for (i=0; (i < (MaxTextExtent-1)) && (*p != 0) && (*p != '\n'); i++)
       version[i]=(*p++);
     version[i]='\0';
   }
@@ -1824,18 +1833,11 @@ static void TIFFSetProfiles(TIFF *tiff,Image *image)
           GetStringInfoLength(iptc_profile)/4,GetStringInfoDatum(iptc_profile));
         iptc_profile=DestroyStringInfo(iptc_profile);
       }
-    if (LocaleCompare(name,"8bim") == 0)
-      {
 #if defined(TIFFTAG_PHOTOSHOP)
-        uint32
-          length;
-
-        length=(uint32) (GetStringInfoLength(profile)+(GetStringInfoLength(
-          profile) & 0x01));
-        (void) TIFFSetField(tiff,TIFFTAG_PHOTOSHOP,length,GetStringInfoDatum(
-          profile));
+    if (LocaleCompare(name,"8bim") == 0)
+      (void) TIFFSetField(tiff,TIFFTAG_PHOTOSHOP,(uint32)
+        GetStringInfoLength(profile),GetStringInfoDatum(profile));
 #endif
-      }
     if (LocaleCompare(name,"tiff:37724") == 0)
       (void) TIFFSetField(tiff,37724,(uint32)GetStringInfoLength(profile),
         GetStringInfoDatum(profile));
@@ -2717,7 +2719,7 @@ static MagickBooleanType WriteTIFFImage(const ImageInfo *image_info,
     }
     quantum_info=DestroyQuantumInfo(quantum_info);
     DestroyTIFFInfo(&tiff_info);
-    if (image_info->verbose == MagickTrue)
+    if (0 && (image_info->verbose == MagickTrue))
       TIFFPrintDirectory(tiff,stdout,MagickFalse);
     (void) TIFFWriteDirectory(tiff);
     image->endian=MSBEndian;

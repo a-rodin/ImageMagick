@@ -286,6 +286,7 @@ MagickExport DrawInfo *CloneDrawInfo(const ImageInfo *image_info,
   if (draw_info->encoding != (char *) NULL)
     (void) CloneString(&clone_info->encoding,draw_info->encoding);
   clone_info->pointsize=draw_info->pointsize;
+  clone_info->kerning=draw_info->kerning;
   if (draw_info->density != (char *) NULL)
     (void) CloneString(&clone_info->density,draw_info->density);
   clone_info->align=draw_info->align;
@@ -4767,6 +4768,9 @@ MagickExport void GetDrawInfo(const ImageInfo *image_info,DrawInfo *draw_info)
   option=GetImageOption(clone_info,"encoding");
   if (option != (const char *) NULL)
     (void) CloneString(&draw_info->encoding,option);
+  option=GetImageOption(clone_info,"kerning");
+  if (option != (const char *) NULL)
+    draw_info->kerning=atof(option);
   option=GetImageOption(clone_info,"fill");
   if (option != (const char *) NULL)
     (void) QueryColorDatabase(option,&draw_info->fill,exception);

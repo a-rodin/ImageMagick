@@ -866,9 +866,12 @@ static MagickBooleanType LoadLocaleList(const char *xml,const char *filename,
                   if (*path != '\0')
                     (void) ConcatenateMagickString(path,DirectorySeparator,
                       MaxTextExtent);
-                  (void) ConcatenateMagickString(path,token,MaxTextExtent);
+                  if (*token == *DirectorySeparator)
+                    (void) CopyMagickString(path,token,MaxTextExtent);
+                  else
+                    (void) ConcatenateMagickString(path,token,MaxTextExtent);
                   xml=FileToString(path,~0,exception);
-                  if (xml == (char *) NULL)
+                  if (xml != (char *) NULL)
                     {
                       status=LoadLocaleList(xml,path,locale,depth+1,exception);
                       xml=(char *) RelinquishMagickMemory(xml);

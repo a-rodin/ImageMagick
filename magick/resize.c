@@ -2447,6 +2447,10 @@ MagickExport Image *ScaleImage(const Image *image,const unsigned long columns,
     *y_vector,
     zero;
 
+  MagickRealType
+    alpha,
+    gamma;
+
   PointInfo
     scale,
     span;
@@ -2751,13 +2755,17 @@ MagickExport Image *ScaleImage(const Image *image,const unsigned long columns,
       t=scale_scanline;
       for (x=0; x < (long) scale_image->columns; x++)
       {
-        q->red=RoundToQuantum(t->red);
-        q->green=RoundToQuantum(t->green);
-        q->blue=RoundToQuantum(t->blue);
+        alpha=1.0;
+        if (image->matte != MagickFalse)
+          alpha=(MagickRealType) (QuantumScale*(QuantumRange-t->opacity));
+        gamma=1.0/(fabs((double) alpha) <= MagickEpsilon ? 1.0 : alpha);
+        q->red=RoundToQuantum(gamma*t->red);
+        q->green=RoundToQuantum(gamma*t->green);
+        q->blue=RoundToQuantum(gamma*t->blue);
         if (scale_image->matte != MagickFalse)
           q->opacity=RoundToQuantum(t->opacity);
         if (scale_indexes != (IndexPacket *) NULL)
-          scale_indexes[x]=(IndexPacket) RoundToQuantum(t->index);
+          scale_indexes[x]=(IndexPacket) RoundToQuantum(gamma*t->index);
         t++;
         q++;
       }

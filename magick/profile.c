@@ -1301,7 +1301,7 @@ static MagickBooleanType GetProfilesFromResourceBlock(Image *image,
 
   datum=GetStringInfoDatum(resource_block);
   length=GetStringInfoLength(resource_block);
-  for (p=datum; p < (datum+length-7); )
+  for (p=datum; p < (datum+length-16); )
   {
     if (LocaleNCompare((char *) p,"8BIM",4) != 0)
       break;
@@ -1340,6 +1340,7 @@ static MagickBooleanType GetProfilesFromResourceBlock(Image *image,
         profile=AcquireStringInfo(count);
         SetStringInfoDatum(profile,p);
         (void) SetImageProfile(image,"iptc",profile);
+        profile=DestroyStringInfo(profile);
         p+=count;
         break;
       }
@@ -1359,6 +1360,7 @@ static MagickBooleanType GetProfilesFromResourceBlock(Image *image,
         profile=AcquireStringInfo(count);
         SetStringInfoDatum(profile,p);
         (void) SetImageProfile(image,"icc",profile);
+        profile=DestroyStringInfo(profile);
         p+=count;
         break;
       }
@@ -1370,6 +1372,7 @@ static MagickBooleanType GetProfilesFromResourceBlock(Image *image,
         profile=AcquireStringInfo(count);
         SetStringInfoDatum(profile,p);
         (void) SetImageProfile(image,"exif",profile);
+        profile=DestroyStringInfo(profile);
         p+=count;
         break;
       }
@@ -1381,6 +1384,7 @@ static MagickBooleanType GetProfilesFromResourceBlock(Image *image,
         profile=AcquireStringInfo(count);
         SetStringInfoDatum(profile,p);
         (void) SetImageProfile(image,"xmp",profile);
+        profile=DestroyStringInfo(profile);
         p+=count;
         break;
       }

@@ -503,7 +503,6 @@ ModuleExport void UnregisterYUVImage(void)
 %
 %    o image:  The image.
 %
-%
 */
 static MagickBooleanType WriteYUVImage(const ImageInfo *image_info,Image *image)
 {

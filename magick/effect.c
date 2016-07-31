@@ -160,6 +160,7 @@ MagickExport Image *AdaptiveBlurImageChannel(const Image *image,
 
   MagickRealType
     alpha,
+    bias,
     normalize;
 
   register long
@@ -264,6 +265,7 @@ MagickExport Image *AdaptiveBlurImageChannel(const Image *image,
   */
   status=MagickTrue;
   progress=0;
+  bias=image->bias;
   GetMagickPixelPacket(image,&zero);
   image_view=AcquireCacheView(image);
   edge_view=AcquireCacheView(edge_image);
@@ -359,16 +361,16 @@ MagickExport Image *AdaptiveBlurImageChannel(const Image *image,
       }
       gamma=1.0/(fabs((double) gamma) <= MagickEpsilon ? 1.0 : gamma);
       if ((channel & RedChannel) != 0)
-        q->red=RoundToQuantum(gamma*pixel.red+image->bias);
+        q->red=RoundToQuantum(gamma*pixel.red+bias);
       if ((channel & GreenChannel) != 0)
-        q->green=RoundToQuantum(gamma*pixel.green+image->bias);
+        q->green=RoundToQuantum(gamma*pixel.green+bias);
       if ((channel & BlueChannel) != 0)
-        q->blue=RoundToQuantum(gamma*pixel.blue+image->bias);
+        q->blue=RoundToQuantum(gamma*pixel.blue+bias);
       if ((channel & OpacityChannel) != 0)
-        q->opacity=RoundToQuantum(pixel.opacity+image->bias);
+        q->opacity=RoundToQuantum(pixel.opacity+bias);
       if (((channel & IndexChannel) != 0) &&
           (image->colorspace == CMYKColorspace))
-        blur_indexes[x]=RoundToQuantum(gamma*pixel.index+image->bias);
+        blur_indexes[x]=RoundToQuantum(gamma*pixel.index+bias);
       q++;
       r++;
     }
@@ -480,6 +482,7 @@ MagickExport Image *AdaptiveSharpenImageChannel(const Image *image,
 
   MagickRealType
     alpha,
+    bias,
     normalize;
 
   register long
@@ -584,6 +587,7 @@ MagickExport Image *AdaptiveSharpenImageChannel(const Image *image,
   */
   status=MagickTrue;
   progress=0;
+  bias=image->bias;
   GetMagickPixelPacket(image,&zero);
   image_view=AcquireCacheView(image);
   edge_view=AcquireCacheView(edge_image);
@@ -679,16 +683,16 @@ MagickExport Image *AdaptiveSharpenImageChannel(const Image *image,
       }
       gamma=1.0/(fabs((double) gamma) <= MagickEpsilon ? 1.0 : gamma);
       if ((channel & RedChannel) != 0)
-        q->red=RoundToQuantum(gamma*pixel.red+image->bias);
+        q->red=RoundToQuantum(gamma*pixel.red+bias);
       if ((channel & GreenChannel) != 0)
-        q->green=RoundToQuantum(gamma*pixel.green+image->bias);
+        q->green=RoundToQuantum(gamma*pixel.green+bias);
       if ((channel & BlueChannel) != 0)
-        q->blue=RoundToQuantum(gamma*pixel.blue+image->bias);
+        q->blue=RoundToQuantum(gamma*pixel.blue+bias);
       if ((channel & OpacityChannel) != 0)
-        q->opacity=RoundToQuantum(pixel.opacity+image->bias);
+        q->opacity=RoundToQuantum(pixel.opacity+bias);
       if (((channel & IndexChannel) != 0) &&
           (image->colorspace == CMYKColorspace))
-        sharp_indexes[x]=RoundToQuantum(gamma*pixel.index+image->bias);
+        sharp_indexes[x]=RoundToQuantum(gamma*pixel.index+bias);
       q++;
       r++;
     }

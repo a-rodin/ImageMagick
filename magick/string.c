@@ -1124,23 +1124,27 @@ MagickExport long FormatMagickTime(const time_t time,const size_t length,
     count;
 
   struct tm
-    local_time,
-    utc_time;
+    *local_time,
+    *utc_time;
 
   time_t
     timezone;
 
   assert(timestamp != (char *) NULL);
-  local_time=(*localtime(&time));
-  utc_time=(*gmtime(&time));
-  timezone=(time_t) ((local_time.tm_min-utc_time.tm_min)/60+local_time.tm_hour-
-    utc_time.tm_hour+24*((local_time.tm_year-utc_time.tm_year) != 0 ?
-    (local_time.tm_year-utc_time.tm_year) : (local_time.tm_yday-
-    utc_time.tm_yday)));
+  local_time=localtime(&time);
+  if (local_time == (struct tm *) NULL)
+    return(0);
+  utc_time=gmtime(&time);
+  if (utc_time == (struct tm *) NULL)
+    return(0);
+  timezone=(time_t) ((local_time->tm_min-utc_time->tm_min)/60+
+    local_time->tm_hour-utc_time->tm_hour+24*((local_time->tm_year-
+    utc_time->tm_year) != 0 ? (local_time->tm_year-utc_time->tm_year) :
+    (local_time->tm_yday-utc_time->tm_yday)));
   count=FormatMagickString(timestamp,length,
-    "%04d-%02d-%02dT%02d:%02d:%02d%+03ld:00",local_time.tm_year+1900,
-    local_time.tm_mon+1,local_time.tm_mday,local_time.tm_hour,local_time.tm_min,
-    local_time.tm_sec,(long) timezone);
+    "%04d-%02d-%02dT%02d:%02d:%02d%+03ld:00",local_time->tm_year+1900,
+    local_time->tm_mon+1,local_time->tm_mday,local_time->tm_hour,
+    local_time->tm_min,local_time->tm_sec,(long) timezone);
   return(count);
 }
 

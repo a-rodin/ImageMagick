@@ -985,22 +985,18 @@ MagickExport MagickStatusType ParseGravityGeometry(const Image *image,
       if ((status & SigmaValue) == 0)
         scale.y=scale.x;
       region_info->width=(unsigned long) ((scale.x*image->columns/100.0)+0.5);
-      if (region_info->width == 0)
-        region_info->width=1;
       region_info->height=(unsigned long) ((scale.y*image->rows/100.0)+0.5);
-      if (region_info->height == 0)
-        region_info->height=1;
     }
   /*
     If a region width of 0 is given by the user, use the images virtual canvas
-    size for the gravity offset adjustments, then restore afterward.
+    size for the gravity offset adjustments-- restore afterward.
   */
   width=region_info->width;
   height=region_info->height;
   if (width == 0)
-    region_info->width  = image->page.width  | image->columns;
+    region_info->width=image->page.width | image->columns;
   if (height == 0)
-    region_info->height = image->page.height | image->rows;
+    region_info->height=image->page.height | image->rows;
   GravityAdjustGeometry(image->columns,image->rows,image->gravity,region_info);
   region_info->width=width;
   region_info->height=height;

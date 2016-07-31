@@ -737,7 +737,7 @@ MagickExport size_t ImportQuantumPixels(Image *image,ViewInfo *image_view,
               for (x=0; x < (long) number_pixels; x++)
               {
                 p=PushCharPixel(p,&pixel);
-                q->red=(Quantum) (QuantumRange-q->red);
+                q->red=(Quantum) (QuantumRange-ScaleCharToQuantum(pixel));
                 q->green=q->red;
                 q->blue=q->red;
                 p+=quantum_info->pad;

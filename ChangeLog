@@ -1,9 +1,38 @@
+2008-12-12  6.4.7-8 mootools <help@mooto...>
+  * FormatMagickTime() checks to ensure the provided time is valid.
+
+2008-12-12  6.4.7-8 Cristy  <quetzlzacatenango@image...>
+  * Add -kerning option to convert.
+  * Remove halo effect for the -scale option.
+
+2008-12-11  6.4.7-7 Alan Wright  <alanwright.atex@google...>
+  * Fix a 1 byte overrun in Postscript coder.
+
+2008-12-10  6.4.7-6 Cristy  <quetzlzacatenango@image...>
+  * Fix small memory leak in ExpandFilenames().
+
+2008-12-09  6.4.7-5 Cristy  <quetzlzacatenango@image...>
+  * Fix small memory leak in LoadLocaleList().
+  * Fix small memory leak in GetProfilesFromResourceBlock().
+  * Don't forget to scale grayscale values when quanum min-is-white is set.
+
+2008-12-08  6.4.7-4 Cristy  <quetzlzacatenango@image...>
+  * Include delegate libraries in MagickCore-config script.
+
+2008-12-07  6.4.7-3 Cristy  <quetzlzacatenango@image...>
+  * Fix off-by-one error for -chop 0x50%.
+  * Performance improvement bilinear interpolation.
+
+2008-12-06  6.4.7-2 Cristy  <quetzlzacatenango@image...>
+  * Support absolute paths in the include directive within a configuration
+    file.
+
 2008-12-05  6.4.7-1 Chris Madison  <madisonblu@gmail...>
   * Assume Log colorspace if DPX transfer is LogarithmicColorimetric.
   * Another attempt at properly extracting the IPTC profile from a 8BIM
     resource block.
 
-2008-12-04  6.4.7-0 Anthony  <A.Thyssen@griffith...>
+2008-12-04  6.4.7-1 Anthony  <A.Thyssen@griffith...>
   * AppendImage() re-written to respect gravity properly!
     Routine simplified to a single loop for both styles of append
 

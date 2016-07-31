@@ -212,7 +212,7 @@ static Image *ReadXPSImage(const ImageInfo *image_info,ExceptionInfo *exception)
     */
     *p++=(char) c;
     if ((c != (int) '/') && (c != '\n') &&
-        ((size_t) (p-command) < MaxTextExtent))
+        ((size_t) (p-command) < (MaxTextExtent-1)))
       continue;
     *p='\0';
     p=command;

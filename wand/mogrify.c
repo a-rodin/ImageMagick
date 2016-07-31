@@ -985,6 +985,17 @@ WandExport MagickBooleanType MogrifyImage(ImageInfo *image_info,const int argc,
             *image=convolve_image;
             break;
           }
+        if (LocaleCompare("crop",option+1) == 0)
+          {
+            flags=ParseGravityGeometry(*image,argv[i+1],&geometry,exception);
+            if (((geometry.width != 0) || (geometry.height != 0)) &&
+                ((flags & XValue) == 0) && ((flags & YValue) == 0))
+              break;
+            (void) SyncImageSettings(image_info,*image);
+            (void) TransformImage(image,argv[i+1],(char *) NULL);
+            InheritException(exception,&(*image)->exception);
+            break;
+          }
         if (LocaleCompare("cycle",option+1) == 0)
           {
             /*
@@ -1566,6 +1577,19 @@ WandExport MagickBooleanType MogrifyImage(ImageInfo *image_info,const int argc,
               break;
             *image=DestroyImage(*image);
             *image=implode_image;
+            break;
+          }
+        break;
+      }
+      case 'k':
+      {
+        if (LocaleCompare("kerning",option+1) == 0)
+          {
+            if (*option == '+')
+              (void) ParseGeometry("0",&geometry_info);
+            else
+              (void) ParseGeometry(argv[i+1],&geometry_info);
+            draw_info->kerning=geometry_info.rho;
             break;
           }
         break;
@@ -3414,6 +3438,7 @@ static void MogrifyUsage(void)
       "-intent type         type of rendering intent when managing the image color",
       "-interlace type      type of image interlacing scheme",
       "-interpolate method  pixel color interpolation method",
+      "-kerning value       set the space between two letters",
       "-label string        assign a label to an image",
       "-limit type value    pixel cache resource limit",
       "-loop iterations     add Netscape loop extension to your GIF animation",
@@ -4526,6 +4551,21 @@ WandExport MagickBooleanType MogrifyImageCommand(ImageInfo *image_info,
             if (interpolate < 0)
               ThrowMogrifyException(OptionError,"UnrecognizedInterpolateMethod",
                 argv[i]);
+            break;
+          }
+        ThrowMogrifyException(OptionError,"UnrecognizedOption",option)
+      }
+      case 'k':
+      {
+        if (LocaleCompare("kerning",option+1) == 0)
+          {
+            if (*option == '+')
+              break;
+            i++;
+            if (i == (long) (argc-1))
+              ThrowMogrifyException(OptionError,"MissingArgument",option);
+            if (IsGeometry(argv[i]) == MagickFalse)
+              ThrowMogrifyInvalidArgumentException(option,argv[i]);
             break;
           }
         ThrowMogrifyException(OptionError,"UnrecognizedOption",option)
@@ -6137,6 +6177,20 @@ WandExport MagickBooleanType MogrifyImageInfo(ImageInfo *image_info,
           }
         break;
       }
+      case 'k':
+      {
+        if (LocaleCompare("kerning",option+1) == 0)
+          {
+            if (*option == '+')
+              {
+                (void) SetImageOption(image_info,option+1,"undefined");
+                break;
+              }
+            (void) SetImageOption(image_info,option+1,argv[i+1]);
+            break;
+          }
+        break;
+      }
       case 'l':
       {
         if (LocaleCompare("label",option+1) == 0)
@@ -6634,6 +6688,7 @@ WandExport MagickBooleanType MogrifyImageInfo(ImageInfo *image_info,
                 break;
               }
             image_info->verbose=MagickTrue;
+            image_info->ping=MagickFalse;
             break;
           }
         if (LocaleCompare("view",option+1) == 0)
@@ -6850,13 +6905,6 @@ WandExport MagickBooleanType MogrifyImageList(ImageInfo *image_info,
             *images=image;
             break;
           }
-        if (LocaleCompare("crop",option+1) == 0)
-          {
-            (void) SyncImagesSettings(image_info,*images);
-            (void) TransformImages(images,argv[i+1],(char *) NULL);
-            InheritException(exception,&(*images)->exception);
-            break;
-          }
         if (LocaleCompare("coalesce",option+1) == 0)
           {
             Image
@@ -6931,6 +6979,16 @@ WandExport MagickBooleanType MogrifyImageList(ImageInfo *image_info,
           }
         if (LocaleCompare("crop",option+1) == 0)
           {
+            int
+              flags;
+
+            RectangleInfo
+              geometry;
+
+            flags=ParseGravityGeometry(*images,argv[i+1],&geometry,exception);
+            if (((geometry.width == 0) && (geometry.height == 0)) ||
+                ((flags & XValue) != 0) || ((flags & YValue) != 0))
+              break;
             (void) SyncImagesSettings(image_info,*images);
             (void) TransformImages(images,argv[i+1],(char *) NULL);
             InheritException(exception,&(*images)->exception);

@@ -284,7 +284,7 @@ static MagickBooleanType WriteARTImage(const ImageInfo *image_info,Image *image)
     status;
 
   QuantumInfo
-    quantum_info;
+    *quantum_info;
 
   register const PixelPacket
     *p;
@@ -328,13 +328,13 @@ static MagickBooleanType WriteARTImage(const ImageInfo *image_info,Image *image)
     Convert image to a bi-level image.
   */
   (void) SetImageType(image,BilevelType);
-  GetQuantumInfo(image_info,&quantum_info);
+  quantum_info=AcquireQuantumInfo(image_info,image);
   for (y=0; y < (long) image->rows; y++)
   {
     p=GetVirtualPixels(image,0,y,image->columns,1,&image->exception);
     if (p == (const PixelPacket *) NULL)
       break;
-    (void) ExportQuantumPixels(image,(const ViewInfo *) NULL,&quantum_info,
+    (void) ExportQuantumPixels(image,(const ViewInfo *) NULL,quantum_info,
       GrayQuantum,pixels,&image->exception);
     count=WriteBlob(image,length,pixels);
     if (count != (ssize_t) length)
@@ -343,6 +343,7 @@ static MagickBooleanType WriteARTImage(const ImageInfo *image_info,Image *image)
     if (SetImageProgress(image,SaveImageTag,y,image->rows) == MagickFalse)
       break;
   }
+  quantum_info=DestroyQuantumInfo(quantum_info);
   pixels=(unsigned char *) RelinquishMagickMemory(pixels);
   (void) CloseBlob(image);
   return(MagickTrue);

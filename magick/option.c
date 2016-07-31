@@ -363,6 +363,8 @@ static const OptionInfo
     { "-interlace", 1L, MagickFalse },
     { "+interpolate", 0L, MagickFalse },
     { "-interpolate", 1L, MagickFalse },
+    { "+kerning", 0L, MagickFalse },
+    { "-kerning", 1L, MagickFalse },
     { "+label", 0L, MagickFalse },
     { "-label", 1L, MagickFalse },
     { "+lat", 0L, MagickFalse },

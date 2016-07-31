@@ -672,13 +672,7 @@ MagickExport MagickBooleanType ExpandFilenames(int *number_arguments,
   char ***arguments)
 {
   char
-    **filelist,
-    filename[MaxTextExtent],
     home_directory[MaxTextExtent],
-    magick[MaxTextExtent],
-    *option,
-    path[MaxTextExtent],
-    subimage[MaxTextExtent],
     **vector;
 
   long
@@ -709,8 +703,20 @@ MagickExport MagickBooleanType ExpandFilenames(int *number_arguments,
   count=0;
   for (i=0; i < (long) *number_arguments; i++)
   {
+    char
+      **filelist,
+      filename[MaxTextExtent],
+      magick[MaxTextExtent],
+      *option,
+      path[MaxTextExtent],
+      subimage[MaxTextExtent];
+
+    MagickBooleanType
+      destroy;
+
     option=(*arguments)[i];
     vector[count++]=ConstantString(option);
+    destroy=MagickTrue;
     parameters=ParseMagickOption(MagickCommandOptions,MagickFalse,option);
     if (parameters > 0)
       {
@@ -761,7 +767,6 @@ MagickExport MagickBooleanType ExpandFilenames(int *number_arguments,
       count+number_files+1,sizeof(*vector));
     if (vector == (char **) NULL)
       return(MagickFalse);
-    count--;
     for (j=0; j < (long) number_files; j++)
     {
       (void) CopyMagickString(filename,path,MaxTextExtent);
@@ -792,6 +797,12 @@ MagickExport MagickBooleanType ExpandFilenames(int *number_arguments,
             }
           if (strlen(path) >= MaxTextExtent)
             ThrowFatalException(OptionFatalError,"FilenameTruncated");
+          if (destroy != MagickFalse)
+            {
+              count--;
+              vector[count]=DestroyString(vector[count]);
+              destroy=MagickFalse;
+            }
           vector[count++]=ConstantString(path);
         }
     }

@@ -225,7 +225,7 @@ static Image *ReadVICARImage(const ImageInfo *image_info,
         p=keyword;
         do
         {
-          if ((size_t) (p-keyword) < MaxTextExtent)
+          if ((size_t) (p-keyword) < (MaxTextExtent-1))
             *p++=c;
           c=ReadBlobByte(image);
           count++;
@@ -244,7 +244,7 @@ static Image *ReadVICARImage(const ImageInfo *image_info,
         p=value;
         while (isalnum(c))
         {
-          if ((size_t) (p-value) < MaxTextExtent)
+          if ((size_t) (p-value) < (MaxTextExtent-1))
             *p++=c;
           c=ReadBlobByte(image);
           count++;

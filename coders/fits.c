@@ -325,7 +325,7 @@ static Image *ReadFITSImage(const ImageInfo *image_info,
         p=keyword;
         do
         {
-          if ((size_t) (p-keyword) < MaxTextExtent)
+          if ((size_t) (p-keyword) < (MaxTextExtent-1))
             *p++=(char) c;
           c=ReadBlobByte(image);
         } while ((isalnum((int) ((unsigned char) c)) != MagickFalse) ||
@@ -345,7 +345,7 @@ static Image *ReadFITSImage(const ImageInfo *image_info,
         p=value;
         while (isalnum(c) || (c == '-') || (c == '+') || (c == '.'))
         {
-          if ((size_t) (p-value) < MaxTextExtent)
+          if ((size_t) (p-value) < (MaxTextExtent-1))
             *p++=c;
           c=ReadBlobByte(image);
         }
@@ -439,9 +439,9 @@ static Image *ReadFITSImage(const ImageInfo *image_info,
       count=ReadBlob(image,length,pixels);
       if ((size_t) count != length)
         break;
-      if (fits_info.bits_per_pixel == 16)
-        SetFITSUnsignedQuantum(image->columns,image->depth,pixels);
-      if (fits_info.bits_per_pixel == 32)
+      if ((fits_info.bits_per_pixel == 16) ||
+          (fits_info.bits_per_pixel == 32) ||
+          (fits_info.bits_per_pixel == 64))
         SetFITSUnsignedQuantum(image->columns,image->depth,pixels);
       length=ImportQuantumPixels(image,(ViewInfo *) NULL,quantum_info,
         GrayQuantum,pixels,exception);
@@ -711,7 +711,7 @@ static MagickBooleanType WriteFITSImage(const ImageInfo *image_info,
       GrayQuantum,pixels,&image->exception);
     if (image->depth == 16)
       SetFITSUnsignedQuantum(image->columns,image->depth,pixels);
-    if ((image->depth == 32) &&
+    if (((image->depth == 32) || (image->depth == 64)) &&
         (quantum_info->format != FloatingPointQuantumFormat))
       SetFITSUnsignedQuantum(image->columns,image->depth,pixels);
     count=WriteBlob(image,length,pixels);
